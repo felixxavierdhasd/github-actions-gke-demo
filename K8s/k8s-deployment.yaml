@@ -13,10 +13,25 @@ spec:
         app: fastapi
     spec:
       containers:
-      - name: fastapi
-        image: us-west1-docker.pkg.dev/active-valve-479215-b4/fastapi-repo/fastapi-app:latest
-        ports:
-        - containerPort: 8001
+        - name: fastapi
+          image: us-west1-docker.pkg.dev/active-valve-479215-b4/fastapi-repo/fastapi-app:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8001
+
+          # ✅ ADD ENV VARIABLES (THIS WAS MISSING)
+          env:
+            - name: DB_HOST
+              value: "35.227.167.17"        # 🔁 replace with your DB PRIVATE IP
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_NAME
+              value: "genworx-demo"
+            - name: DB_USER
+              value: "felix"
+            - name: DB_PASSWORD
+              value: "E@j#u_5304"
+
 ---
 apiVersion: v1
 kind: Service

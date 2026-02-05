@@ -1,0 +1,79 @@
+# -----------------------------
+# 1️⃣ Secret for Cloud SQL credentials
+# -----------------------------
+apiVersion: v1
+kind: Secret
+metadata:
+  name: cloudsql-secret
+type: Opaque
+data:
+  DB_USER: ZmVsaXg=          # felix
+  DB_PASSWORD: RUBqI3VfNTMwNA==  # E@j#u_5304
+  DB_NAME: Z2Vud29yeC1kZW1v  # genworx-demo
+
+---
+# -----------------------------
+# 2️⃣ Deployment for Product Service
+# -----------------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gke-demo
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gke-demo
+  template:
+    metadata:
+      labels:
+        app: gke-demo
+    spec:
+      containers:
+        - name: app
+          image: us-west1-docker.pkg.dev/active-valve-479215-b4/my-docker-art/gek-demo:v4
+          ports:
+            - containerPort: 8001
+          env:
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-secret
+                  key: DB_USER
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-secret
+                  key: DB_PASSWORD
+            - name: DB_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: cloudsql-secret
+                  key: DB_NAME
+            - name: DB_HOST
+              value: "35.227.167.17"
+            - name: DB_PORT
+              value: "5432"
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+
+---
+# -----------------------------
+# 3️⃣ Service (LoadBalancer)
+# -----------------------------
+apiVersion: v1
+kind: Service
+metadata:
+  name: gke-demo-svc
+spec:
+  type: LoadBalancer
+  selector:
+    app: gke-demo
+  ports:
+    - port: 8001
+      targetPort: 8001

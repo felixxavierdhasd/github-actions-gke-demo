@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gke-demo-with-probes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: gke-demo-with-probes
+  template:
+    metadata:
+      labels:
+        app: gke-demo-with-probes
+    spec:
+      containers:
+        - name: gke-demo-with-probes
+          image: us-west1-docker.pkg.dev/active-valve-479215-b4/my-docker-art/gek-demo:v5
+          ports:
+            - containerPort: 8001
+
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            failureThreshold: 30
+            periodSeconds: 3
+
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            periodSeconds: 10
+
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8001
+            periodSeconds: 5
+
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

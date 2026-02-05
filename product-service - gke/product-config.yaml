@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: product-service-config
+data:
+  PRODUCT_SERVICE_HOST: "0.0.0.0"
+  PRODUCT_SERVICE_PORT: "8001"
+  ALGORITHM: "HS256"
+  ACCESS_TOKEN_EXPIRE_MINUTES: "30"

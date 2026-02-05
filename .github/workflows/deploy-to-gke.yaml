@@ -13,28 +13,33 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    # ✅ 1. Authenticate to GCP (CORRECT WAY)
+    # 1️⃣ Authenticate to GCP
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    # ✅ 2. Setup gcloud SDK
+    # 2️⃣ Setup gcloud SDK
     - name: Set up gcloud
       uses: google-github-actions/setup-gcloud@v2
       with:
         project_id: ${{ secrets.GCP_PROJECT_ID }}
 
-    # ✅ 3. Install kubectl
+    # 3️⃣ Install kubectl
     - name: Install kubectl
       uses: azure/setup-kubectl@v4
 
-    # ✅ 4. Configure Docker for Artifact Registry
+    # 🔥 4️⃣ Install GKE auth plugin (REQUIRED)
+    - name: Install GKE gcloud auth plugin
+      run: |
+        gcloud components install gke-gcloud-auth-plugin --quiet
+
+    # 5️⃣ Configure Docker for Artifact Registry
     - name: Configure Docker
       run: |
         gcloud auth configure-docker us-west1-docker.pkg.dev --quiet
 
-    # ✅ 5. Create GKE Cluster if not exists
+    # 6️⃣ Create GKE Cluster if not exists
     - name: Create GKE Cluster if not exists
       run: |
         CLUSTER_NAME=fastapi-cluster
@@ -49,15 +54,15 @@ jobs:
           echo "Cluster already exists"
         fi
 
-    # ✅ 6. Build & Push Docker Image
+    # 7️⃣ Build & Push Docker Image
     - name: Build & Push Docker Image
       run: |
         IMAGE=us-west1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/fastapi-repo/fastapi-app:latest
         docker build -t $IMAGE .
         docker push $IMAGE
 
-    # ✅ 7. Deploy to GKE
+    # 8️⃣ Deploy to GKE
     - name: Deploy to GKE
       run: |
         gcloud container clusters get-credentials fastapi-cluster --zone us-west1-a
-        kubectl apply -f k8/k8s-deployment.yaml
+        kubectl apply -f K8s/k8s-deployment.yaml
